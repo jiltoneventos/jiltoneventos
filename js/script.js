@@ -1,111 +1,41 @@
-/* =========================================================
-   J. ILTON EVENTOS
-   Funcionalidades de interação
-   ========================================================= */
+const formulario = document.querySelector("#formulario-contato");
+const mensagemFormulario = document.querySelector("#mensagem-formulario");
 
-document.addEventListener("DOMContentLoaded", () => {
-    const menuToggle = document.querySelector(".menu-toggle");
-    const navigation = document.querySelector(".navigation");
-    const contactForm = document.querySelector("#contact-form");
-    const feedback = document.querySelector("#form-feedback");
-    const currentYear = document.querySelector("#current-year");
-    const spaceLinks = document.querySelectorAll("[data-space]");
+formulario.addEventListener("submit", function (event) {
+    event.preventDefault();
 
-    /*
-     * Atualiza automaticamente o ano exibido no rodapé.
-     */
-    if (currentYear) {
-        currentYear.textContent = new Date().getFullYear();
-    }
+    const dados = new FormData(formulario);
 
-    /*
-     * Abre e fecha o menu em telas menores.
-     */
-    if (menuToggle && navigation) {
-        menuToggle.addEventListener("click", () => {
-            const isOpen = navigation.classList.toggle("is-open");
+    const nome = dados.get("nome");
+    const telefone = dados.get("telefone");
+    const email = dados.get("email");
+    const interesse = dados.get("interesse");
+    const visita = dados.get("visita");
+    const mensagem = dados.get("mensagem");
 
-            menuToggle.setAttribute("aria-expanded", String(isOpen));
-            menuToggle.setAttribute(
-                "aria-label",
-                isOpen ? "Fechar menu" : "Abrir menu"
-            );
-        });
+    const textoWhatsApp = `
+Olá! Gostaria de obter informações sobre um evento.
 
-        /*
-         * Fecha o menu depois que o usuário toca em um item.
-         */
-        navigation.querySelectorAll("a").forEach((link) => {
-            link.addEventListener("click", () => {
-                navigation.classList.remove("is-open");
-                menuToggle.setAttribute("aria-expanded", "false");
-                menuToggle.setAttribute("aria-label", "Abrir menu");
-            });
-        });
-    }
+Nome: ${nome}
+Telefone: ${telefone}
+E-mail: ${email}
+Interesse: ${interesse}
+Deseja agendar uma visita: ${visita}
 
-    /*
-     * Quando o usuário clica em "Tenho interesse",
-     * o espaço selecionado é preenchido automaticamente no formulário.
-     */
-    spaceLinks.forEach((link) => {
-        link.addEventListener("click", () => {
-            const selectedSpace = link.dataset.space;
-            const interestField = document.querySelector("#interest");
+Mensagem:
+${mensagem}
+    `.trim();
 
-            if (interestField && selectedSpace) {
-                interestField.value = selectedSpace;
-            }
-        });
-    });
+    const mensagemCodificada = encodeURIComponent(textoWhatsApp);
+    const numeroWhatsApp = "5521991556171";
 
-    /*
-     * Envio do formulário por WhatsApp.
-     *
-     * Este site é estático e não exige servidor.
-     * O formulário monta uma mensagem e abre o WhatsApp.
-     */
-    if (contactForm) {
-        contactForm.addEventListener("submit", (event) => {
-            event.preventDefault();
+    const urlWhatsApp =
+        `https://wa.me/${numeroWhatsApp}?text=${mensagemCodificada}`;
 
-            const formData = new FormData(contactForm);
+    mensagemFormulario.textContent =
+        "Redirecionando para o WhatsApp...";
 
-            const name = formData.get("name")?.trim();
-            const phone = formData.get("phone")?.trim();
-            const email = formData.get("email")?.trim();
-            const interest = formData.get("interest")?.trim();
-            const visitDate = formData.get("visit-date")?.trim();
-            const message = formData.get("message")?.trim();
+    mensagemFormulario.style.color = "#3D526C";
 
-            if (!name || !phone) {
-                feedback.textContent =
-                    "Preencha pelo menos seu nome e telefone.";
-                return;
-            }
-
-            const whatsappMessage = [
-                "Olá! Gostaria de solicitar informações sobre os espaços da J. Ilton Eventos.",
-                "",
-                `Nome: ${name}`,
-                `Telefone: ${phone}`,
-                `E-mail: ${email || "Não informado"}`,
-                `Interesse: ${interest || "Ainda não definido"}`,
-                `Melhor período para visita: ${visitDate || "Não informado"}`,
-                `Mensagem: ${message || "Não informada"}`
-            ].join("\n");
-
-            const whatsappNumber = "5521991556171";
-            const whatsappUrl =
-                `https://wa.me/${whatsappNumber}?text=` +
-                encodeURIComponent(whatsappMessage);
-
-            feedback.textContent =
-                "Abrindo o WhatsApp com sua solicitação...";
-
-            window.open(whatsappUrl, "_blank", "noopener,noreferrer");
-
-            contactForm.reset();
-        });
-    }
+    window.open(urlWhatsApp, "_blank");
 });
